@@ -1,4 +1,4 @@
-// Wed, 19 Jun 2019 11:35:54 GMT
+// Wed, 19 Jun 2019 12:38:09 GMT
 
 /*
  * Copyright (c) 2015 cannon.js Authors
@@ -28,7 +28,7 @@ module.exports={
   "name": "cannon",
   "version": "1.0.0",
   "description": "A lightweight 3D physics engine written in JavaScript.",
-  "homepage": "https://github.com/cocos-creator/cannon.js",
+  "homepage": "https://github.com/JayceLai/cannon.js",
   "author": "JayceLai",
   "keywords": [
     "cannon.js",
@@ -43,10 +43,10 @@ module.exports={
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/cocos-creator/cannon.js.git"
+    "url": "https://github.com/JayceLai/cannon.js.git"
   },
   "bugs": {
-    "url": "https://github.com/cocos-creator/cannon.js/issues"
+    "url": "https://github.com/JayceLai/cannon.js/issues"
   },
   "licenses": [
     {
