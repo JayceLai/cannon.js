@@ -1,4 +1,4 @@
-// Wed, 19 Jun 2019 12:38:09 GMT
+// Wed, 19 Jun 2019 13:25:59 GMT
 
 /*
  * Copyright (c) 2015 cannon.js Authors
@@ -14148,7 +14148,7 @@ var
      * @event preStep
      */
     World_step_preStepEvent = {type:"preStep"},
-    World_step_collideEvent = {type:Body.COLLIDE_EVENT_NAME, event:'', body:null, contacts:null },
+    World_step_collideEvent = {type:"collide", event:'', body:null, contacts:null },
     World_step_oldContacts = [], // Pools for unused objects
     World_step_frictionEquationPool = [],
     World_step_p1 = [], // Reusable arrays for collision pairs
