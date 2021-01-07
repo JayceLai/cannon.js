@@ -1,4 +1,4 @@
-// Wed, 30 Dec 2020 03:26:38 GMT
+// Thu, 07 Jan 2021 06:52:23 GMT
 
 /*
  * Copyright (c) 2015 cannon.js Authors
@@ -26,7 +26,7 @@
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.CANNON=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 module.exports={
   "name": "@cocos/cannon",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "A lightweight 3D physics engine written in JavaScript.",
   "homepage": "https://github.com/cocos-creator/cannon.js",
   "author": "Stefan Hedman <schteppe@gmail.com> (http://steffe.se), JayceLai",
@@ -40,7 +40,8 @@ module.exports={
   ],
   "scripts": {
     "build":"grunt && npm run preprocess && grunt addLicense && grunt addDate",
-    "preprocess":"node node_modules/uglify-js/bin/uglifyjs build/cannon.js -o build/cannon.min.js -c -m"
+    "preprocess":"node node_modules/uglify-js/bin/uglifyjs build/cannon.js -o build/cannon.min.js -c -m",
+    "postpublish": "cnpm sync @cocos/cannon"
   },
   "main": "./build/cannon.js",
   "engines": {
@@ -589,9 +590,7 @@ Broadphase.prototype.needBroadphaseCollision = function(bodyA,bodyB){
     }
 
     var isSA = (bodyA.type & Body.STATIC)!==0;
-    var isKA = (bodyA.type & Body.KINEMATIC)!==0;
     var isSB = (bodyB.type & Body.STATIC)!==0;
-    var isKB = (bodyB.type & Body.KINEMATIC)!==0;
 
     // s - s
     if(isSA && isSB) return false;
@@ -600,11 +599,6 @@ Broadphase.prototype.needBroadphaseCollision = function(bodyA,bodyB){
     if(bodyA.hasTrigger || bodyB.hasTrigger){
         return true;
     } else {
-        // Check is dynamic
-        if((isSA || isKA) && (isSB || isKB)){
-            return false;
-        }
-
         // Check sleep state
         if((bodyA.sleepState === Body.SLEEPING) &&
            (bodyB.sleepState === Body.SLEEPING)) {
@@ -12266,14 +12260,15 @@ Narrowphase.prototype.getContacts = function(p1, p2, world, result, oldcontacts,
             bodyContactMaterial = world.getContactMaterial(bi.material,bj.material) || null;
         }
 
-        var justTest = ( bi.collisionResponse == false || bj.collisionResponse == false ||
-            (
-                (bi.type & Body.KINEMATIC) && (bj.type & Body.STATIC)
-            ) || (
-                (bi.type & Body.STATIC) && (bj.type & Body.KINEMATIC)
-            ) || (
-                (bi.type & Body.KINEMATIC) && (bj.type & Body.KINEMATIC)
-            )
+        // Allow get kinematic contact
+        var justTest = ( bi.collisionResponse == false || bj.collisionResponse == false 
+            // || (
+            //     (bi.type & Body.KINEMATIC) && (bj.type & Body.STATIC)
+            // ) || (
+            //     (bi.type & Body.STATIC) && (bj.type & Body.KINEMATIC)
+            // ) || (
+            //     (bi.type & Body.KINEMATIC) && (bj.type & Body.KINEMATIC)
+            // )
         );
 
         for (var i = 0; i < bi.shapes.length; i++) {
