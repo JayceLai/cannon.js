@@ -240,14 +240,15 @@ Narrowphase.prototype.getContacts = function(p1, p2, world, result, oldcontacts,
             bodyContactMaterial = world.getContactMaterial(bi.material,bj.material) || null;
         }
 
-        var justTest = ( bi.collisionResponse == false || bj.collisionResponse == false ||
-            (
-                (bi.type & Body.KINEMATIC) && (bj.type & Body.STATIC)
-            ) || (
-                (bi.type & Body.STATIC) && (bj.type & Body.KINEMATIC)
-            ) || (
-                (bi.type & Body.KINEMATIC) && (bj.type & Body.KINEMATIC)
-            )
+        // Allow get kinematic contact
+        var justTest = ( bi.collisionResponse == false || bj.collisionResponse == false 
+            // || (
+            //     (bi.type & Body.KINEMATIC) && (bj.type & Body.STATIC)
+            // ) || (
+            //     (bi.type & Body.STATIC) && (bj.type & Body.KINEMATIC)
+            // ) || (
+            //     (bi.type & Body.KINEMATIC) && (bj.type & Body.KINEMATIC)
+            // )
         );
 
         for (var i = 0; i < bi.shapes.length; i++) {

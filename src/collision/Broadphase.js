@@ -60,9 +60,7 @@ Broadphase.prototype.needBroadphaseCollision = function(bodyA,bodyB){
     }
 
     var isSA = (bodyA.type & Body.STATIC)!==0;
-    var isKA = (bodyA.type & Body.KINEMATIC)!==0;
     var isSB = (bodyB.type & Body.STATIC)!==0;
-    var isKB = (bodyB.type & Body.KINEMATIC)!==0;
 
     // s - s
     if(isSA && isSB) return false;
@@ -71,11 +69,6 @@ Broadphase.prototype.needBroadphaseCollision = function(bodyA,bodyB){
     if(bodyA.hasTrigger || bodyB.hasTrigger){
         return true;
     } else {
-        // Check is dynamic
-        if((isSA || isKA) && (isSB || isKB)){
-            return false;
-        }
-
         // Check sleep state
         if((bodyA.sleepState === Body.SLEEPING) &&
            (bodyB.sleepState === Body.SLEEPING)) {
