@@ -1,4 +1,4 @@
-// Thu, 07 Jan 2021 06:52:23 GMT
+// Wed, 27 Jan 2021 12:43:05 GMT
 
 /*
  * Copyright (c) 2015 cannon.js Authors
@@ -26,7 +26,7 @@
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.CANNON=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 module.exports={
   "name": "@cocos/cannon",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "A lightweight 3D physics engine written in JavaScript.",
   "homepage": "https://github.com/cocos-creator/cannon.js",
   "author": "Stefan Hedman <schteppe@gmail.com> (http://steffe.se), JayceLai",
@@ -10921,10 +10921,9 @@ var computeLocalAABB_worldVert = new Vec3();
 Trimesh.prototype.computeLocalAABB = function(aabb){
     var l = aabb.lowerBound,
         u = aabb.upperBound,
-        n = this.vertices.length,
-        vertices = this.vertices,
+        n = this.vertices.length/3,
         v = computeLocalAABB_worldVert;
-
+    if (n===0) return;
     this.getVertex(0, v);
     l.copy(v);
     u.copy(v);
