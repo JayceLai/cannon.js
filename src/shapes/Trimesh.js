@@ -389,10 +389,9 @@ var computeLocalAABB_worldVert = new Vec3();
 Trimesh.prototype.computeLocalAABB = function(aabb){
     var l = aabb.lowerBound,
         u = aabb.upperBound,
-        n = this.vertices.length,
-        vertices = this.vertices,
+        n = this.vertices.length/3,
         v = computeLocalAABB_worldVert;
-
+    if (n===0) return;
     this.getVertex(0, v);
     l.copy(v);
     u.copy(v);
