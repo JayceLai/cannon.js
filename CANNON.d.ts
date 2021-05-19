@@ -628,6 +628,9 @@ declare namespace CANNON {
         public useGravity: boolean;
         public hasTrigger: boolean;
 
+        public ccdSpeedThreshold: number;
+        public ccdIterations: number;
+
         constructor (options?: IBodyOptions);
 
         public isAwake (): boolean;
