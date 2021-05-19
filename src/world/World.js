@@ -875,22 +875,6 @@ World.prototype.internalStep = function(dt){
     // Remove all contacts from solver
     solver.removeAllEquations();
 
-    // Apply damping, see http://code.google.com/p/bullet/issues/detail?id=74 for details
-    var pow = Math.pow;
-    for(i=0; i!==N; i++){
-        var bi = bodies[i];
-        if(bi.type & DYNAMIC){ // Only for dynamic bodies
-            var ld = pow(1.0 - bi.linearDamping,dt);
-            var v = bi.velocity;
-            v.mult(ld,v);
-            var av = bi.angularVelocity;
-            if(av){
-                var ad = pow(1.0 - bi.angularDamping,dt);
-                av.mult(ad,av);
-            }
-        }
-    }
-
     this.dispatchEvent(World_step_preStepEvent);
 
     // Invoke pre-step callbacks
@@ -915,6 +899,22 @@ World.prototype.internalStep = function(dt){
         bodies[i].integrate(dt, quatNormalize, quatNormalizeFast);
     }
     this.clearForces();
+
+    // Apply damping, see http://code.google.com/p/bullet/issues/detail?id=74 for details
+    var pow = Math.pow;
+    for(i=0; i!==N; i++){
+        var bi = bodies[i];
+        if(bi.type & DYNAMIC){ // Only for dynamic bodies
+            var ld = pow(1.0 - bi.linearDamping,dt);
+            var v = bi.velocity;
+            v.mult(ld,v);
+            var av = bi.angularVelocity;
+            if(av){
+                var ad = pow(1.0 - bi.angularDamping,dt);
+                av.mult(ad,av);
+            }
+        }
+    }
 
     this.broadphase.dirty = true;
 
