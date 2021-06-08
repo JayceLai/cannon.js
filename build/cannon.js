@@ -1,4 +1,4 @@
-// Tue, 18 May 2021 10:10:08 GMT
+// Tue, 08 Jun 2021 07:08:38 GMT
 
 /*
  * Copyright (c) 2015 cannon.js Authors
@@ -26,7 +26,7 @@
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.CANNON=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 module.exports={
   "name": "@cocos/cannon",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "A lightweight 3D physics engine written in JavaScript.",
   "homepage": "https://github.com/cocos-creator/cannon.js",
   "author": "Stefan Hedman <schteppe@gmail.com> (http://steffe.se), JayceLai",
@@ -12066,6 +12066,11 @@ function Narrowphase(world){
      * @property {Boolean} enableFrictionReduction
      */
     this.enableFrictionReduction = false;
+
+    /**
+     * add epsilon for stability
+     */
+    this.epsilon = 1e-2;
 }
 
 /**
@@ -12288,7 +12293,7 @@ Narrowphase.prototype.getContacts = function(p1, p2, world, result, oldcontacts,
                     continue;
                 }
 
-                if(xi.distanceTo(xj) > si.boundingSphereRadius + sj.boundingSphereRadius){
+                if(xi.distanceTo(xj) > si.boundingSphereRadius + sj.boundingSphereRadius - this.epsilon){
                     continue;
                 }
 
