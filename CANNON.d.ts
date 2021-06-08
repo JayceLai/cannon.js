@@ -1215,6 +1215,7 @@ declare namespace CANNON {
 
     class Solver {
         public iterations: number;
+        public tolerance: number;
         public equations: Equation[];
 
         public solve (dy: number, world: World): number;
@@ -1304,7 +1305,7 @@ declare namespace CANNON {
         public bodies: Body[];
         public solver: Solver;
         public constraints: Constraint[];
-        public narrowPhase: NarrowPhase;
+        public narrowphase: NarrowPhase;
         public collisionMatrix: ArrayCollisionMatrix;
         public collisionMatrixPrevious: ArrayCollisionMatrix;
         public materials: Material[];
