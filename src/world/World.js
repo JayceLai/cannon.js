@@ -617,7 +617,7 @@ World.prototype.internalStep = function(dt){
     for(i=0; i!==N; i++){
         var bi = bodies[i];
         if(bi.type === DYNAMIC) {
-            if (bi.useGravity) { // Only for dynamic bodies
+            if (bi.useGravity && bi.linearDamping != 1) { // Only for dynamic bodies
                 var f = bi.force, m = bi.mass;
                 f.x += m*gx;
                 f.y += m*gy;
