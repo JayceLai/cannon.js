@@ -613,15 +613,23 @@ World.prototype.internalStep = function(dt){
         profilingStart = performance.now();
     }
 
-    // Add gravity to all objects
+    // apply damping / kinematic / gravity
     for(i=0; i!==N; i++){
         var bi = bodies[i];
-        if(bi.type === DYNAMIC) {
-            if (bi.useGravity && bi.linearDamping != 1) { // Only for dynamic bodies
-                var f = bi.force, m = bi.mass;
-                f.x += m*gx;
-                f.y += m*gy;
-                f.z += m*gz;
+        if(bi.type === DYNAMIC) {                  
+            // damping external force
+            if(bi.linearDamping == 1) {
+                bi.force.setZero();
+            } else {
+                if (bi.useGravity) { // Only for dynamic bodies
+                    var f = bi.force, m = bi.mass;
+                    f.x += m*gx;
+                    f.y += m*gy;
+                    f.z += m*gz;
+                }
+            }
+            if(bi.angularDamping == 1) {
+                bi.torque.setZero();
             }
         } else {
             bi.updateKinematic(dt);
