@@ -1,4 +1,4 @@
-// Wed, 09 Jun 2021 03:11:38 GMT
+// Wed, 09 Jun 2021 09:12:09 GMT
 
 /*
  * Copyright (c) 2015 cannon.js Authors
@@ -26,7 +26,7 @@
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.CANNON=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 module.exports={
   "name": "@cocos/cannon",
-  "version": "1.2.6",
+  "version": "1.2.6-exp.2",
   "description": "A lightweight 3D physics engine written in JavaScript.",
   "homepage": "https://github.com/cocos-creator/cannon.js",
   "author": "Stefan Hedman <schteppe@gmail.com> (http://steffe.se), JayceLai",
@@ -6463,6 +6463,24 @@ Body.prototype.updateKinematic = function (dt) {
             wq.toEuler(this.angularVelocity);
             this.angularVelocity.mult(invDt, this.angularVelocity);
             this.aabbNeedsUpdate = true;
+        }
+    }
+}
+
+Body.prototype.applyGravity = function (gravity) {
+    if (this.type === Body.DYNAMIC) {
+        // zero external force if damping = 1
+        if(this.linearDamping == 1) {
+            this.force.setZero();
+        } else {
+            if (this.useGravity) {
+                var gx = gravity.x, gy = gravity.y, gz = gravity.z;
+                var f = this.force, m = this.mass;
+                f.x += m*gx; f.y += m*gy; f.z += m*gz;
+            }
+        }
+        if(this.angularDamping == 1) {
+            this.torque.setZero();
         }
     }
 }
@@ -14405,7 +14423,19 @@ if(!performance.now){
     };
 }
 
-var step_tmp1 = new Vec3();
+World.prototype.saveKinematicAndApplyGravity = function(dt) {
+    var bodies = this.bodies;
+    var N = this.bodies.length;
+    // apply damping / kinematic / gravity
+    for(var i=0; i!==N; i++){
+        var bi = bodies[i];
+        if(bi.type === Body.DYNAMIC) {
+            bi.applyGravity(this.gravity);
+        } else if(bi.type === Body.KINEMATIC) {
+            bi.updateKinematic(dt);
+        }
+    }
+}
 
 /**
  * Step the physics world forward in time.
@@ -14429,6 +14459,7 @@ World.prototype.step = function(dt, timeSinceLastCalled, maxSubSteps){
 
     if(timeSinceLastCalled === 0){ // Fixed, simple stepping
 
+        this.saveKinematicAndApplyGravity(dt);
         this.internalStep(dt);
 
         // Increment time
@@ -14436,6 +14467,7 @@ World.prototype.step = function(dt, timeSinceLastCalled, maxSubSteps){
         this.substeps = 1;
 
     } else {
+        this.saveKinematicAndApplyGravity(timeSinceLastCalled);
 
         this.accumulator += timeSinceLastCalled;
         this.substeps = 0;
@@ -14455,6 +14487,7 @@ World.prototype.step = function(dt, timeSinceLastCalled, maxSubSteps){
         }
         this.time += timeSinceLastCalled;
     }
+    this.clearForces();
 };
 
 var
@@ -14497,44 +14530,16 @@ World.prototype.internalStep = function(dt){
         N = this.numObjects(),
         bodies = this.bodies,
         solver = this.solver,
-        gravity = this.gravity,
         doProfiling = this.doProfiling,
         profile = this.profile,
         DYNAMIC = Body.DYNAMIC,
         profilingStart,
         constraints = this.constraints,
         frictionEquationPool = World_step_frictionEquationPool,
-        gnorm = gravity.norm(),
-        gx = gravity.x,
-        gy = gravity.y,
-        gz = gravity.z,
         i=0;
 
     if(doProfiling){
         profilingStart = performance.now();
-    }
-
-    // apply damping / kinematic / gravity
-    for(i=0; i!==N; i++){
-        var bi = bodies[i];
-        if(bi.type === DYNAMIC) {                  
-            // damping external force
-            if(bi.linearDamping == 1) {
-                bi.force.setZero();
-            } else {
-                if (bi.useGravity) { // Only for dynamic bodies
-                    var f = bi.force, m = bi.mass;
-                    f.x += m*gx;
-                    f.y += m*gy;
-                    f.z += m*gz;
-                }
-            }
-            if(bi.angularDamping == 1) {
-                bi.torque.setZero();
-            }
-        } else {
-            bi.updateKinematic(dt);
-        }
     }
 
     // Update subsystems
@@ -14807,7 +14812,6 @@ World.prototype.internalStep = function(dt){
     for(i=0; i!==N; i++){
         bodies[i].integrate(dt, quatNormalize, quatNormalizeFast);
     }
-    this.clearForces();
 
     // Apply damping, see http://code.google.com/p/bullet/issues/detail?id=74 for details
     var pow = Math.pow;
