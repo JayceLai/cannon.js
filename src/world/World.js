@@ -508,7 +508,7 @@ World.prototype.saveKinematicAndApplyGravity = function(dt) {
     var bodies = this.bodies;
     var N = this.bodies.length;
     // apply damping / kinematic / gravity
-    for(i=0; i!==N; i++){
+    for(var i=0; i!==N; i++){
         var bi = bodies[i];
         if(bi.type === Body.DYNAMIC) {
             bi.applyGravity(this.gravity);
