@@ -1010,6 +1010,24 @@ Body.prototype.updateKinematic = function (dt) {
     }
 }
 
+Body.prototype.applyGravity = function (gravity) {
+    if (this.type === Body.DYNAMIC) {
+        // zero external force if damping = 1
+        if(this.linearDamping == 1) {
+            this.force.setZero();
+        } else {
+            if (this.useGravity) {
+                var gx = gravity.x, gy = gravity.y, gz = gravity.z;
+                var f = this.force, m = this.mass;
+                f.x += m*gx; f.y += m*gy; f.z += m*gz;
+            }
+        }
+        if(this.angularDamping == 1) {
+            this.torque.setZero();
+        }
+    }
+}
+
 var direction = new Vec3();
 var end = new Vec3();
 var end2 = new Vec3();

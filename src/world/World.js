@@ -504,7 +504,19 @@ if(!performance.now){
     };
 }
 
-var step_tmp1 = new Vec3();
+World.prototype.saveKinematicAndApplyGravity = function(dt) {
+    var bodies = this.bodies;
+    var N = this.bodies.length;
+    // apply damping / kinematic / gravity
+    for(i=0; i!==N; i++){
+        var bi = bodies[i];
+        if(bi.type === Body.DYNAMIC) {
+            bi.applyGravity(this.gravity);
+        } else if(bi.type === Body.KINEMATIC) {
+            bi.updateKinematic(dt);
+        }
+    }
+}
 
 /**
  * Step the physics world forward in time.
@@ -528,6 +540,7 @@ World.prototype.step = function(dt, timeSinceLastCalled, maxSubSteps){
 
     if(timeSinceLastCalled === 0){ // Fixed, simple stepping
 
+        this.saveKinematicAndApplyGravity(dt);
         this.internalStep(dt);
 
         // Increment time
@@ -535,6 +548,7 @@ World.prototype.step = function(dt, timeSinceLastCalled, maxSubSteps){
         this.substeps = 1;
 
     } else {
+        this.saveKinematicAndApplyGravity(timeSinceLastCalled);
 
         this.accumulator += timeSinceLastCalled;
         this.substeps = 0;
@@ -554,6 +568,7 @@ World.prototype.step = function(dt, timeSinceLastCalled, maxSubSteps){
         }
         this.time += timeSinceLastCalled;
     }
+    this.clearForces();
 };
 
 var
@@ -596,44 +611,16 @@ World.prototype.internalStep = function(dt){
         N = this.numObjects(),
         bodies = this.bodies,
         solver = this.solver,
-        gravity = this.gravity,
         doProfiling = this.doProfiling,
         profile = this.profile,
         DYNAMIC = Body.DYNAMIC,
         profilingStart,
         constraints = this.constraints,
         frictionEquationPool = World_step_frictionEquationPool,
-        gnorm = gravity.norm(),
-        gx = gravity.x,
-        gy = gravity.y,
-        gz = gravity.z,
         i=0;
 
     if(doProfiling){
         profilingStart = performance.now();
-    }
-
-    // apply damping / kinematic / gravity
-    for(i=0; i!==N; i++){
-        var bi = bodies[i];
-        if(bi.type === DYNAMIC) {                  
-            // damping external force
-            if(bi.linearDamping == 1) {
-                bi.force.setZero();
-            } else {
-                if (bi.useGravity) { // Only for dynamic bodies
-                    var f = bi.force, m = bi.mass;
-                    f.x += m*gx;
-                    f.y += m*gy;
-                    f.z += m*gz;
-                }
-            }
-            if(bi.angularDamping == 1) {
-                bi.torque.setZero();
-            }
-        } else {
-            bi.updateKinematic(dt);
-        }
     }
 
     // Update subsystems
@@ -906,7 +893,6 @@ World.prototype.internalStep = function(dt){
     for(i=0; i!==N; i++){
         bodies[i].integrate(dt, quatNormalize, quatNormalizeFast);
     }
-    this.clearForces();
 
     // Apply damping, see http://code.google.com/p/bullet/issues/detail?id=74 for details
     var pow = Math.pow;
