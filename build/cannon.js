@@ -1,4 +1,4 @@
-// Wed, 09 Jun 2021 09:12:09 GMT
+// Mon, 28 Jun 2021 06:31:20 GMT
 
 /*
  * Copyright (c) 2015 cannon.js Authors
@@ -26,7 +26,7 @@
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.CANNON=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 module.exports={
   "name": "@cocos/cannon",
-  "version": "1.2.6-exp.2",
+  "version": "1.2.7-exp.1",
   "description": "A lightweight 3D physics engine written in JavaScript.",
   "homepage": "https://github.com/cocos-creator/cannon.js",
   "author": "Stefan Hedman <schteppe@gmail.com> (http://steffe.se), JayceLai",
@@ -5844,6 +5844,9 @@ function Body(options){
      */
     this.aabbNeedsUpdate = true;
 
+    // Cache the state to wake up sleeping dynamic body
+    this.aabbNeedsUpdateCache = true;
+
     /**
      * Total bounding radius of the Body including its shapes, relative to body.position.
      * @property boundingRadius
@@ -5866,6 +5869,18 @@ function Body(options){
 }
 Body.prototype = new EventTarget();
 Body.prototype.constructor = Body;
+
+Object.defineProperty(Body.prototype, 'aabbNeedsUpdate', {
+    get:function() {
+        return this._aabbNeedsUpdate;
+    },
+    set:function(v) {
+        this._aabbNeedsUpdate = v;
+        if (v) this.aabbNeedsUpdateCache = v;
+    },
+    enumerable: true
+})
+
 
 /**
  * Dispatched after two bodies collide. This event is dispatched on each
@@ -14488,6 +14503,11 @@ World.prototype.step = function(dt, timeSinceLastCalled, maxSubSteps){
         this.time += timeSinceLastCalled;
     }
     this.clearForces();
+    
+    // reset cache
+    for(var j=0; j !== this.bodies.length; j++){
+        this.bodies[j].aabbNeedsUpdateCache = false;
+    }
 };
 
 var
@@ -14714,10 +14734,14 @@ World.prototype.internalStep = function(dt){
             bj.sleepState  === Body.AWAKE &&
             bj.type !== Body.STATIC
         ){
-            var speedSquaredB = bj.velocity.norm2() + bj.angularVelocity.norm2();
-            var speedLimitSquaredB = Math.pow(bj.sleepSpeedLimit,2);
-            if(speedSquaredB >= speedLimitSquaredB*2){
+            if(bj.aabbNeedsUpdateCache){
                 bi._wakeUpAfterNarrowphase = true;
+            }else{
+                var speedSquaredB = bj.velocity.norm2() + bj.angularVelocity.norm2();
+                var speedLimitSquaredB = Math.pow(bj.sleepSpeedLimit,2);
+                if(speedSquaredB >= speedLimitSquaredB*2){
+                    bi._wakeUpAfterNarrowphase = true;
+                }
             }
         }
 
@@ -14727,10 +14751,15 @@ World.prototype.internalStep = function(dt){
             bi.sleepState  === Body.AWAKE &&
             bi.type !== Body.STATIC
         ){
-            var speedSquaredA = bi.velocity.norm2() + bi.angularVelocity.norm2();
-            var speedLimitSquaredA = Math.pow(bi.sleepSpeedLimit,2);
-            if(speedSquaredA >= speedLimitSquaredA*2){
+            
+            if(bi.aabbNeedsUpdateCache){
                 bj._wakeUpAfterNarrowphase = true;
+            }else{
+                var speedSquaredA = bi.velocity.norm2() + bi.angularVelocity.norm2();
+                var speedLimitSquaredA = Math.pow(bi.sleepSpeedLimit,2);
+                if(speedSquaredA >= speedLimitSquaredA*2){
+                    bj._wakeUpAfterNarrowphase = true;
+                }
             }
         }
 
