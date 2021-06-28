@@ -569,6 +569,11 @@ World.prototype.step = function(dt, timeSinceLastCalled, maxSubSteps){
         this.time += timeSinceLastCalled;
     }
     this.clearForces();
+    
+    // reset cache
+    for(var j=0; j !== this.bodies.length; j++){
+        this.bodies[j].aabbNeedsUpdateCache = false;
+    }
 };
 
 var
@@ -795,10 +800,14 @@ World.prototype.internalStep = function(dt){
             bj.sleepState  === Body.AWAKE &&
             bj.type !== Body.STATIC
         ){
-            var speedSquaredB = bj.velocity.norm2() + bj.angularVelocity.norm2();
-            var speedLimitSquaredB = Math.pow(bj.sleepSpeedLimit,2);
-            if(speedSquaredB >= speedLimitSquaredB*2){
+            if(bj.aabbNeedsUpdateCache){
                 bi._wakeUpAfterNarrowphase = true;
+            }else{
+                var speedSquaredB = bj.velocity.norm2() + bj.angularVelocity.norm2();
+                var speedLimitSquaredB = Math.pow(bj.sleepSpeedLimit,2);
+                if(speedSquaredB >= speedLimitSquaredB*2){
+                    bi._wakeUpAfterNarrowphase = true;
+                }
             }
         }
 
@@ -808,10 +817,15 @@ World.prototype.internalStep = function(dt){
             bi.sleepState  === Body.AWAKE &&
             bi.type !== Body.STATIC
         ){
-            var speedSquaredA = bi.velocity.norm2() + bi.angularVelocity.norm2();
-            var speedLimitSquaredA = Math.pow(bi.sleepSpeedLimit,2);
-            if(speedSquaredA >= speedLimitSquaredA*2){
+            
+            if(bi.aabbNeedsUpdateCache){
                 bj._wakeUpAfterNarrowphase = true;
+            }else{
+                var speedSquaredA = bi.velocity.norm2() + bi.angularVelocity.norm2();
+                var speedLimitSquaredA = Math.pow(bi.sleepSpeedLimit,2);
+                if(speedSquaredA >= speedLimitSquaredA*2){
+                    bj._wakeUpAfterNarrowphase = true;
+                }
             }
         }
 

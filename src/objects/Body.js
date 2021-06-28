@@ -387,6 +387,9 @@ function Body(options){
      */
     this.aabbNeedsUpdate = true;
 
+    // Cache the state to wake up sleeping dynamic body
+    this.aabbNeedsUpdateCache = true;
+
     /**
      * Total bounding radius of the Body including its shapes, relative to body.position.
      * @property boundingRadius
@@ -409,6 +412,18 @@ function Body(options){
 }
 Body.prototype = new EventTarget();
 Body.prototype.constructor = Body;
+
+Object.defineProperty(Body.prototype, 'aabbNeedsUpdate', {
+    get:function() {
+        return this._aabbNeedsUpdate;
+    },
+    set:function(v) {
+        this._aabbNeedsUpdate = v;
+        if (v) this.aabbNeedsUpdateCache = v;
+    },
+    enumerable: true
+})
+
 
 /**
  * Dispatched after two bodies collide. This event is dispatched on each
