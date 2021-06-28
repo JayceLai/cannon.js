@@ -247,7 +247,6 @@ World.idToBodyMap = {};
 World.idToShapeMap = {};
 World.integrateKinematic = false;
 World.ccdSphereAdvance = false;
-World.autoWakeUpDynamicWhenExit = true;
 World.prototype = new EventTarget();
 
 // Temp stuff
@@ -1204,12 +1203,6 @@ World.prototype.emitCollisionEvents = function () {
             if (this.cm.get(bi, bj)) {
                 if (!bi.isSleeping() || !bj.isSleeping()) {
                     this.cm.set(bi, bj, false);
-
-                    // This is very useful when gravity is not enough to re-awaken the dynamic body
-                    if (World.autoWakeUpDynamicWhenExit) {
-                        if (bi.type & Body.DYNAMIC) bi.wakeUp();
-                        if (bj.type & Body.DYNAMIC) bj.wakeUp();
-                    }
 
                     cc_collide.bi = bi;    
                     cc_collide.contact = data;
